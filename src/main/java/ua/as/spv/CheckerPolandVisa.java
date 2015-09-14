@@ -12,6 +12,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 /**
@@ -19,41 +20,66 @@ import org.jsoup.select.Elements;
  * @author andr
  */
 public class CheckerPolandVisa {
-
+    final Logger log = Logger.getLogger(this.getClass().getSimpleName());
     final String startUrl = "http://www.polandvisa-ukraine.com/scheduleappointment_2.html";
 
+   
+
     public void run() {
-
-        Map<String, String> post = new HashMap<>(5);
-        post.put("__EVENTTARGET", "ctl00$plhMain$lnkSchApp");
-
-        stepTwo(getFrameUrl());
+	stepTwo(getFrameUrl());
 
     }
 
     protected String getFrameUrl() {
-        Document doc;
-        Elements els = null;
-        try {
-            doc = Jsoup.connect(startUrl).get();
-            els = doc.select("iframe");
 
-        } catch (IOException ex) {
-            Logger.getLogger(CheckerPolandVisa.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return els.attr("src");
+	String result = null;
+	try {
+	    Document doc = Jsoup.connect(startUrl).get();
+	    Elements els = doc.select("iframe");
+	    result = els.attr("src");
+	} catch (IOException ex) {
+	    Logger.getLogger(CheckerPolandVisa.class.getName()).log(Level.SEVERE, null, ex);
+	}
+	return result;
     }
 
     protected void stepTwo(String url) {
+	
+	Map<String, String> param1 = new HashMap<>(5);
+	param1.put("__EVENTTARGET", "ctl00$plhMain$lnkSchApp");//__EVENTARGUMENT
+	param1.put("__EVENTARGUMENT", "");
 
-        Document doc;
-        try {
-            doc = Jsoup.connect(url).post();
-            System.out.println(doc.toString());
+	Document doc = new JsoupSSL().post(url,param1);
+	Map<String,String> param = new HashMap<>(9);
 
-        } catch (IOException ex) {
-            Logger.getLogger(CheckerPolandVisa.class.getName()).log(Level.SEVERE, null, ex);
-        }
+	System.out.println(doc);
+	
+	//получить список всех городов 
+	Elements els = doc.select("#ctl00_plhMain_cboVAC");
+	  // System.out.println(doc);
+	
+	
+	for (Element el : els) {
+	    System.out.println(el);
+	}
+	
+	
+	
+	param.put("__VIEWSTATE", doc.select("#__VIEWSTATE").attr("value"));
+	param.put("__EVENTVALIDATION", doc.select("#__EVENTVALIDATION").attr("value"));
+	param.put("__VIEWSTATEENCRYPTED", doc.select("#__VIEWSTATEENCRYPTED").attr("value"));
+	param.put("____Ticket", doc.select("#____Ticket").attr("value"));
+	param.put("ctl00$hidCSRF", doc.select("#ctl00_hidCSRF").attr("value"));
+
+	param.put("ctl00$plhMain$cboVAC", "12"); // Код города 	
+	param.put("ctl00$plhMain$cboPurpose","1"); // подача документов  
+	
+	param.put("ctl00$plhMain$btnSubmit", doc.select("#ctl00_plhMain_btnSubmit").attr("value"));//Підтвердити
+	
+	
+//	System.out.println(param);
+//	System.out.println("n\n\n\n\n\n\n\n");
+//	System.out.println(new JsoupSSL().post(url,param));
 
     }
 

@@ -10,7 +10,6 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import static org.junit.Assert.*;
 
 /**
  *
@@ -40,22 +39,13 @@ public class CheckerPolandVisaTest {
     /**
      * Test of run method, of class CheckerPolandVisa.
      */
-    //@Test
+    @Test
     public void testRun() {
         System.out.println("run");
         CheckerPolandVisa instance = new CheckerPolandVisa();
         instance.run();
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        
     }
 
-    /**
-     * Test of stepOne method, of class CheckerPolandVisa.
-     */
-    @Test
-    public void testStepOne() {
-     CheckerPolandVisa c = new  CheckerPolandVisa();
-     c.run();
-    }
     
 }
