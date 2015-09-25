@@ -30,9 +30,9 @@ import org.jsoup.nodes.Document;
  */
 public class JsoupSSL {
 
-    final Logger log = Logger.getLogger(this.getClass().getSimpleName());
+    final static Logger log = Logger.getLogger("JsoupSSL");
 
-    public void enableSSLSocket() throws NoSuchAlgorithmException, KeyManagementException {
+    public static  void enableSSLSocket() throws NoSuchAlgorithmException, KeyManagementException {
 	HttpsURLConnection.setDefaultHostnameVerifier(new HostnameVerifier() {
 
 	    @Override
@@ -64,7 +64,7 @@ public class JsoupSSL {
 
     }
 
-    public Document post(String url , Map<String,String> param) {
+    public static  Document post(String url , Map<String,String> param) {
 
 	if(param == null){
 	     param = new HashMap<>(0);

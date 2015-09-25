@@ -20,13 +20,16 @@ import org.jsoup.select.Elements;
  * @author andr
  */
 public class CheckerPolandVisa {
+
     final Logger log = Logger.getLogger(this.getClass().getSimpleName());
     final String startUrl = "http://www.polandvisa-ukraine.com/scheduleappointment_2.html";
-
-   
+    final String statusID = "#ctl00_plhMain_lblMsg";
 
     public void run() {
-	stepTwo(getFrameUrl());
+	Map<String, String> param;
+	String urlIframe = getFrameUrl();//получили url iframe грузим содержимое 
+
+	param = toPost(urlIframe);
 
     }
 
@@ -43,43 +46,65 @@ public class CheckerPolandVisa {
 	return result;
     }
 
-    protected void stepTwo(String url) {
-	
-	Map<String, String> param1 = new HashMap<>(5);
-	param1.put("__EVENTTARGET", "ctl00$plhMain$lnkSchApp");//__EVENTARGUMENT
-	param1.put("__EVENTARGUMENT", "");
+    //получаем данные из iframe в том числе ссылку на "Призначити дату подачі документів"
+    protected Map<String, String> toPost(String url) {
 
-	Document doc = new JsoupSSL().post(url,param1);
-	Map<String,String> param = new HashMap<>(9);
+	Document doc = JsoupSSL.post(url, null);
+
+	Map<String, String> param = new HashMap<>(9);
 
 	System.out.println(doc);
-	
-	//получить список всех городов 
-	Elements els = doc.select("#ctl00_plhMain_cboVAC");
-	  // System.out.println(doc);
-	
-	
-	for (Element el : els) {
-	    System.out.println(el);
-	}
-	
-	
-	
+        String urlscr= doc.select("#ctl00_plhMain_lnkSchApp").attr("href").split("'")[1];
+	System.out.println(urlscr);
+	 
 	param.put("__VIEWSTATE", doc.select("#__VIEWSTATE").attr("value"));
 	param.put("__EVENTVALIDATION", doc.select("#__EVENTVALIDATION").attr("value"));
 	param.put("__VIEWSTATEENCRYPTED", doc.select("#__VIEWSTATEENCRYPTED").attr("value"));
 	param.put("____Ticket", doc.select("#____Ticket").attr("value"));
 	param.put("ctl00$hidCSRF", doc.select("#ctl00_hidCSRF").attr("value"));
 
-	param.put("ctl00$plhMain$cboVAC", "12"); // Код города 	
-	param.put("ctl00$plhMain$cboPurpose","1"); // подача документов  
-	
-	param.put("ctl00$plhMain$btnSubmit", doc.select("#ctl00_plhMain_btnSubmit").attr("value"));//Підтвердити
-	
-	
-//	System.out.println(param);
+//	param.put("ctl00$plhMain$cboVAC", "12"); // Код города 	
+//	param.put("ctl00$plhMain$cboPurpose","1"); // подача документов  
+//	
+//	param.put("ctl00$plhMain$btnSubmit", doc.select("#ctl00_plhMain_btnSubmit").attr("value"));//Підтвердити
+	//System.out.println(param);
 //	System.out.println("n\n\n\n\n\n\n\n");
+//	System.out.println("tree");
 //	System.out.println(new JsoupSSL().post(url,param));
+	return param;
+    }
+
+    protected Map<String, String> getSity(String url, Map<String, String> par) {
+
+	Document doc = JsoupSSL.post(url, par);
+
+	Map<String, String> param = new HashMap<>(9);
+
+	System.out.println(doc);
+
+	//получить список всех городов 
+	Elements els = doc.select("#ctl00_plhMain_cboVAC");
+	  // System.out.println(doc);
+
+	for (Element el : els) {
+	    System.out.println(el);
+	}
+
+	param.put("__VIEWSTATE", doc.select("#__VIEWSTATE").attr("value"));
+	param.put("__EVENTVALIDATION", doc.select("#__EVENTVALIDATION").attr("value"));
+	param.put("__VIEWSTATEENCRYPTED", doc.select("#__VIEWSTATEENCRYPTED").attr("value"));
+	param.put("____Ticket", doc.select("#____Ticket").attr("value"));
+	param.put("ctl00$hidCSRF", doc.select("#ctl00_hidCSRF").attr("value"));
+
+//	param.put("ctl00$plhMain$cboVAC", "12"); // Код города 	
+//	param.put("ctl00$plhMain$cboPurpose","1"); // подача документов  
+//	
+//	param.put("ctl00$plhMain$btnSubmit", doc.select("#ctl00_plhMain_btnSubmit").attr("value"));//Підтвердити
+	//System.out.println(param);
+//	System.out.println("n\n\n\n\n\n\n\n");
+//	System.out.println("tree");
+//	System.out.println(new JsoupSSL().post(url,param));
+	return param;
 
     }
 
