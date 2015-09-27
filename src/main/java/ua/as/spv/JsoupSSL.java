@@ -11,7 +11,6 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -32,7 +31,7 @@ public class JsoupSSL {
 
     final static Logger log = Logger.getLogger("JsoupSSL");
 
-    public static  void enableSSLSocket() throws NoSuchAlgorithmException, KeyManagementException {
+    public static void enableSSLSocket() throws NoSuchAlgorithmException, KeyManagementException {
 	HttpsURLConnection.setDefaultHostnameVerifier(new HostnameVerifier() {
 
 	    @Override
@@ -64,20 +63,63 @@ public class JsoupSSL {
 
     }
 
-    public static  Document post(String url , Map<String,String> param) {
-
-	if(param == null){
-	     param = new HashMap<>(0);
+    public static Document post2(String url, Map<String, String> param) {
 	
-	}
+	
 	try {
 	    enableSSLSocket();
 
-	    Connection.Response response = Jsoup.connect(url)
-		    .data(param)
+	    Connection con = Jsoup.connect(url)
 		    .userAgent("Mozilla/5.0 (Windows NT 10.0; WOW64; rv:42.0) Gecko/20100101 Firefox/42.0")
-		    .method(Connection.Method.POST)
-		    .execute();
+		    .referrer(url)
+		    .header("Connection", "keep-alive")
+		    .method(Connection.Method.POST);
+
+	    if (param != null) {
+		param.remove("");
+		con.data(param);
+	    }
+
+	    Connection.Response response = con.execute();
+	    
+	    switch (response.statusCode()) {
+
+		case 200:
+		    log.info("Хорошо");
+		    return response.parse();
+
+		default:
+		    log.info(Integer.toString(response.statusCode()));
+		    break;
+
+	    }
+
+	} catch (IOException ex) {
+	    Logger.getLogger(CheckerPolandVisa.class.getName()).log(Level.SEVERE, null, ex);
+	} catch (NoSuchAlgorithmException | KeyManagementException ex) {
+	    Logger.getLogger(JsoupSSL.class.getName()).log(Level.SEVERE, null, ex);
+	}
+
+	return null;
+    }
+
+    public static Document post(String url, Map<String, String> param) {
+
+	try {
+	    enableSSLSocket();
+
+	    Connection con = Jsoup.connect(url)
+		    .userAgent("Mozilla/5.0 (Windows NT 10.0; WOW64; rv:42.0) Gecko/20100101 Firefox/42.0")
+		    .referrer(url)
+		    .header("Connection", "keep-alive")
+		    .method(Connection.Method.POST);
+
+	    if (param != null) {
+		param.remove("");
+		con.data(param);
+	    }
+
+	    Connection.Response response = con.execute();
 
 	    switch (response.statusCode()) {
 
@@ -91,8 +133,10 @@ public class JsoupSSL {
 
 	    }
 
-	} catch (IOException | NoSuchAlgorithmException | KeyManagementException ex) {
+	} catch (IOException ex) {
 	    Logger.getLogger(CheckerPolandVisa.class.getName()).log(Level.SEVERE, null, ex);
+	} catch (NoSuchAlgorithmException | KeyManagementException ex) {
+	    Logger.getLogger(JsoupSSL.class.getName()).log(Level.SEVERE, null, ex);
 	}
 
 	return null;
